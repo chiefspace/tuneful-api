@@ -14,11 +14,11 @@ class File(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
 
-    def as_dict(self):
+    def as_dictionary(self):
         return {
-            'id': self.id,
-            'name': self.name,
-            'path': url_for('uploaded_file', filename=self.name)
+            "id": self.id,
+            "name": self.filename,
+            "path": url_for("uploaded_file", filename=self.filename)
         }
 
 
