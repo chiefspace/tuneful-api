@@ -71,6 +71,74 @@ def post_song():
     return Response(data, 201, headers=headers,
                     mimetype="application/json")
 
+@app.route('/api/songs/<int:id>', methods=['GET'])
+@decorators.accept("application/json")
+def get_song(id):
+    song = session.query(models.Song).get(id)
+
+    if song:
+        data = json.dumps(song.as_dict())
+        return Response(data, 200, mimetype='application/json')
+    else:
+        message = 'Could not find song with id {}'.format(id)
+        data = json.dumps({'message': message})
+        return Response(data, 404, mimetype='application/json')
+
+@app.route('/api/songs/<int:id>', methods=['PUT'])
+@decorators.accept("application/json")
+@decorators.require("application/json")
+def put_song(id):
+    song = session.query(models.Song).get(id)
+
+    if not song:
+        message = 'Could not find song with id {}'.format(id)
+        data = json.dumps({'message': message})
+        return Response(data, 404, mimetype='application/json')
+
+    data = request.json
+    # Check that the JSON supplied is valid
+    # If not you return a 422 Unprocessable Entity
+    try:
+        jsonschema.validate(data, song_schema)
+    except jsonschema.ValidationError as error:
+        error = json.dumps({"message": error.message})
+        return Response(error, 422, mimetype="application/json")
+
+    file_ = session.query(models.File).get(data['file']['id'])
+    if not file_:
+        message = 'Could not find file with id {}'.format(data['file']['id'])
+        error = json.dumps({'message': message})
+        return Response(error, 404, mimetype='application/json')
+
+    # Add the song to the database
+    song.file_ = file_
+    session.add(song)
+    session.commit()
+
+    data = json.dumps(song.as_dict())
+    return Response(data, 200, mimetype="application/json")
+
+@app.route('/api/songs/<int:id>', methods=['DELETE'])
+@decorators.accept("application/json")
+@decorators.require("application/json")
+def delete_song(id):
+    song = session.query(models.Song).get(id)
+
+    if not song:
+        message = 'Could not find song with id {}'.format(id)
+        data = json.dumps({'message': message})
+        return Response(data, 404, mimetype='application/json')
+
+    session.delete(song)
+    session.commit()
+
+    data = json.dumps(song.as_dict())
+    return Response(data, 200, mimetype="application/json")
+
+@app.route("/uploads/<filename>", methods=["GET"])
+def uploaded_file(filename):
+    return send_from_directory(upload_path(), filename)
+
 
 
 
