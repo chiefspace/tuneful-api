@@ -17,8 +17,8 @@ class File(Base):
     def as_dictionary(self):
         return {
             "id": self.id,
-            "name": self.filename,
-            "path": url_for("uploaded_file", filename=self.filename)
+            "name": self.name,
+            "path": url_for("uploaded_file", filename=self.name)
         }
 
 
@@ -30,8 +30,8 @@ class Song(Base):
     file_ = relationship(File, backref=backref('song', uselist=False),
                          single_parent=True, cascade="all, delete-orphan")
 
-    def as_dict(self):
+    def as_dictionary(self):
         return {
             'id': self.id,
-            'file': self.file_.as_dict()
+            'file': self.file_.as_dictionary()
 }

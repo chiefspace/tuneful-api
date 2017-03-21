@@ -35,7 +35,7 @@ def get_songs():
     data = session.query(models.Song)
 
     data = data.order_by(models.Song.id)
-    return Response(json.dumps([song.as_dict() for song in data]),
+    return Response(json.dumps([song.as_dictionary() for song in data]),
                     200, mimetype='application/json')
 
 @app.route("/api/songs", methods=["POST"])
@@ -66,7 +66,7 @@ def post_song():
 
     # Return a 201 Created, containing the song as JSON and with the
     # Location header set to the location of the song
-    data = json.dumps(song.as_dict())
+    data = json.dumps(song.as_dictionary())
     headers = {"Location": url_for("get_song", id=song.id)}
     return Response(data, 201, headers=headers,
                     mimetype="application/json")
@@ -77,7 +77,7 @@ def get_song(id):
     song = session.query(models.Song).get(id)
 
     if song:
-        data = json.dumps(song.as_dict())
+        data = json.dumps(song.as_dictionary())
         return Response(data, 200, mimetype='application/json')
     else:
         message = 'Could not find song with id {}'.format(id)
@@ -115,7 +115,7 @@ def put_song(id):
     session.add(song)
     session.commit()
 
-    data = json.dumps(song.as_dict())
+    data = json.dumps(song.as_dictionary())
     return Response(data, 200, mimetype="application/json")
 
 @app.route('/api/songs/<int:id>', methods=['DELETE'])
@@ -132,7 +132,7 @@ def delete_song(id):
     session.delete(song)
     session.commit()
 
-    data = json.dumps(song.as_dict())
+    data = json.dumps(song.as_dictionary())
     return Response(data, 200, mimetype="application/json")
 
 @app.route("/uploads/<filename>", methods=["GET"])
@@ -154,8 +154,5 @@ def file_post():
     session.commit()
     file_.save(upload_path(filename))
 
-    data = db_file.as_dict()
+    data = db_file.as_dictionary()
     return Response(json.dumps(data), 201, mimetype="application/json")
-
-
-
