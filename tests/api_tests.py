@@ -27,6 +27,17 @@ class TestAPI(unittest.TestCase):
 
         # Create folder for test uploads
         os.mkdir(upload_path())
+        
+    def test_get_uploaded_file(self):
+        path = upload_path('test.txt')
+        with open(path, "wb") as f:
+            f.write(b"File contents")
+
+        response = self.client.get("/uploads/test.txt")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "text/plain")
+        self.assertEqual(response.data, b"File contents")
 
     def tearDown(self):
         """ Test teardown """
