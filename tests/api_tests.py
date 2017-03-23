@@ -55,6 +55,41 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response_song_B['file']['id'], song_B.file_.id)
         self.assertEqual(response_song_B['file']['name'], song_B.file_.name)
         
+    def test_post_song(self):
+        file_A = models.File(name='file_A.mp3')
+        session.add(file_A)
+        session.commit()
+
+        data = {
+            "file": {
+                "id": file_A.id
+            }
+        }
+
+        response = self.client.post(
+            "/api/songs",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=[("Accept", "application/json")])
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.mimetype, "application/json")
+        self.assertEqual(
+            urlparse(response.headers.get("Location")).path, "/api/songs/1")
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["id"], 1)
+        self.assertEqual(data["file"]["id"], 1)
+        self.assertEqual(data["file"]["name"], "file_A.mp3")
+
+        songs = session.query(models.Song).all()
+        self.assertEqual(len(songs), 1)
+
+        song = songs[0]
+        self.assertEqual(song.id, 1)
+        self.assertEqual(song.file_.id, 1)
+        self.assertEqual(song.file_.name, "file_A.mp3")
+        
     def test_get_uploaded_file(self):
         path = upload_path('test.txt')
         with open(path, "wb") as f:
